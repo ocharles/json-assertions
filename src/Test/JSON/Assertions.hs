@@ -14,6 +14,7 @@ module Test.JSON.Assertions
 
 import Control.Monad.Indexed (IxFunctor(..))
 import Control.MonadPlus.Indexed.Free (IxFree(..))
+import Data.Monoid (First)
 
 import qualified Control.Lens as Lens
 import qualified Control.Lens.Aeson as Aeson
@@ -77,7 +78,7 @@ stop = Free Stop
 
 --------------------------------------------------------------------------------
 testJSON :: Aeson.ToJSON i => JSONTest i j a -> i -> [String]
-testJSON f env = go f (Aeson.toJSON env) env "subject"
+testJSON tests env = go tests (Aeson.toJSON env) env "subject"
  
  where
 
@@ -86,18 +87,12 @@ testJSON f env = go f (Aeson.toJSON env) env "subject"
   go (Pure _) _ _ _ = []
  
   go (Free (Key key f k)) actual expected descr =
-    let descr' = descr ++ "[\"" ++ key ++ "\"]"
-    in case Lens.preview (Aeson.key (Text.pack key)) actual of
-         Nothing -> [descr' ++ " failed to match any targets"]
-         Just matched ->
-           go (k (f expected)) matched (f expected) descr'
+    tryLens (Aeson.key (Text.pack key)) f actual expected k $
+      descr ++ "[\"" ++ key ++ "\"]"
 
   go (Free (Index n f k)) actual expected descr =
-    let descr' = descr ++ "[" ++ show n ++ "]"
-    in case Lens.preview (Aeson.nth n) actual of
-         Nothing -> [descr' ++ " failed to match any targets"]
-         Just matched ->
-           go (k (f expected)) matched (f expected) descr'
+    tryLens (Aeson.nth n) f actual expected k $
+      descr ++ " failed to match any targets"
 
   go (Free (Assert p k)) actual expected descr =
     either return (const []) (p actual)
@@ -106,3 +101,15 @@ testJSON f env = go f (Aeson.toJSON env) env "subject"
 
   go (Plus steps) actual expected descr =
     concatMap (\s -> go s actual expected descr) steps
+
+  tryLens :: Lens.Getting (First Aeson.Value) Aeson.Value Aeson.Value
+          -> (i -> j) -> Aeson.Value
+          -> i -> (j -> JSONTest j k a)
+          -> String
+          -> [String]
+
+  tryLens l f actual expected k path =
+    case Lens.preview l actual of
+      Nothing -> [path ++ " failed to match any targets"]
+      Just matched ->
+        go (k (f expected)) matched (f expected) path
