@@ -5,6 +5,7 @@ module Test.JSON.Assertions
     , nth
     , assertEq
     , stop
+    , jsonTest
 
       -- * Test Interpreters
     , testJSON
@@ -12,7 +13,7 @@ module Test.JSON.Assertions
     , JSONTest
     ) where
 
-import Control.Monad.Indexed (IxFunctor(..))
+import Control.Monad.Indexed (IxFunctor(..), (>>>=))
 import Control.MonadPlus.Indexed.Free (IxFree(..))
 import Data.Monoid (First)
 
@@ -75,6 +76,10 @@ assertEq expected =
 stop :: JSONTest a () r
 stop = Free Stop
 
+
+--------------------------------------------------------------------------------
+-- | Finalize a 'JSONTest' by calling 'stop' at the end.
+jsonTest = (>>>= const stop)
 
 --------------------------------------------------------------------------------
 testJSON :: Aeson.ToJSON i => JSONTest i j a -> i -> [String]
