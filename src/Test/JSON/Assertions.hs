@@ -1,4 +1,46 @@
 {-# LANGUAGE GADTs #-}
+
+{-|
+@json-assertions@ is a library for validating that your JSON encoding matches 
+what you are actually expecting. It does this by providing you with a DSL to 
+traverse a JSON document at the same time as you traverse the value that was 
+encoded. As you traverse the JSON document, you are building up assertions (by 
+asserting that you expect certain keys and array indices to exist), and you can 
+also add your own assertions to check the contents of object properties.
+
+'JSONTest' is an indexed monad, so you will need to enable @RebindableSyntax@ 
+and bring indexed monadic bind into scope:
+
+> {-# LANGUAGE RebindableSyntax #-}
+> import Prelude hiding (Monad(..))
+> import Control.Monad.Indexed ((>>>=), ireturn)
+> import Test.JSON.Assertions
+> import Data.Aeson
+>
+> return :: a -> JSONTest i i a
+> return = ireturn
+>
+> (>>=) :: m i j a -> (a -> m j k b) -> m i k b
+> (>>=) = (>>>=)
+
+You can now write tests as an action in the 'JSONTest' monad. The first index 
+is the type of the object you wish to encode, and the second parameter is the 
+type that the test ends in. For example, consider the following:
+
+> data Person = Person { personName :: String }
+> instance ToJSON Person where
+>   toJSON p = object [ "name" .= personName p ]
+
+We can write a test to check that the JSON encoding of a @Person@'s name is
+correct:
+
+> personTest :: JSONTest Person String String
+> personTest = do
+>   expectedName <- key "name"
+>   assertEq expectedName
+
+-}
+
 module Test.JSON.Assertions
     ( -- * Tests and Traversals
       key
@@ -41,7 +83,9 @@ type JSONTest = IxFree JSONF
 
 
 --------------------------------------------------------------------------------
--- | Traverse into the value underneath a specific key in the JSON structure.
+-- | Traverse into the value underneath a specific key in the JSON structure. 
+-- The return value is the value inside the Haskell value - that is, the result 
+-- applying the associated morphism.
 key :: String   -- ^ JSON Key
     -> (i -> j) -- ^ An associated morphism into a substructure of the test environment
     -> JSONTest i j j
@@ -49,7 +93,9 @@ key k f = Free (Key k f Pure)
 
 
 --------------------------------------------------------------------------------
--- | Traverse the specific index of a JSON array
+-- | Traverse the specific index of a JSON array.
+-- The return value is the value inside the Haskell value - that is, the result 
+-- applying the associated morphism.
 nth :: Int      -- ^ JSON array index
     -> (i -> j) -- ^ An associated morphism into a substructure of the test environment
     -> JSONTest i j j
@@ -83,6 +129,9 @@ jsonTest :: JSONTest i j a -> JSONTest i () a
 jsonTest = (>>>= const stop)
 
 --------------------------------------------------------------------------------
+-- | Run a 'JSONTest' against a Haskell value that can be encoded to JSON. 
+-- Returns a list of strings describing the failed assertions, or the empty list
+-- if all assertions were satisfied.
 testJSON :: Aeson.ToJSON i => JSONTest i j a -> i -> [String]
 testJSON tests env = go tests (Aeson.toJSON env) env "subject"
 
