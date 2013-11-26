@@ -79,6 +79,7 @@ stop = Free Stop
 
 --------------------------------------------------------------------------------
 -- | Finalize a 'JSONTest' by calling 'stop' at the end.
+jsonTest :: JSONTest i j a -> JSONTest i () a
 jsonTest = (>>>= const stop)
 
 --------------------------------------------------------------------------------
@@ -100,7 +101,7 @@ testJSON tests env = go tests (Aeson.toJSON env) env "subject"
       descr ++ " failed to match any targets"
 
   go (Free (Assert p k)) actual expected descr =
-    either return (const []) (p actual)
+    either (return . ((descr ++ " failed assertion\n") ++)) (const []) (p actual)
 
   go (Free Stop) _ _ _ = []
 
