@@ -39,6 +39,8 @@ correct:
 >   expectedName <- key "name"
 >   assertEq expectedName
 
+For more information, you may wish to read <http://ocharles.org.uk/blog/posts/2013-11-24-using-indexed-free-monads-to-quickcheck-json.html>.
+
 -}
 
 module Test.JSON.Assertions
