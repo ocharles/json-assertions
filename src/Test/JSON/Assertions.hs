@@ -30,10 +30,10 @@ data JSONF i j a where
   Stop :: JSONF i () a
 
 instance IxFunctor JSONF where
-  imap g (Key key f k) = Key key f (g . k)
+  imap g (Key keyS f k) = Key keyS f (g . k)
   imap g (Index n f k) = Index n f (g . k)
   imap f (Assert p k) = Assert p (f k)
-  imap f Stop = Stop
+  imap _ Stop = Stop
 
 
 --------------------------------------------------------------------------------
@@ -92,16 +92,19 @@ testJSON tests env = go tests (Aeson.toJSON env) env "subject"
 
   go (Pure _) _ _ _ = []
 
-  go (Free (Key key f k)) actual expected descr =
-    tryLens (Aeson.key (Text.pack key)) f actual expected k $
-      descr ++ "[\"" ++ key ++ "\"]"
+  go (Free (Key keyS f k)) actual expected descr =
+    tryLens (Aeson.key (Text.pack keyS)) f actual expected k $
+      descr ++ "[\"" ++ keyS ++ "\"]"
 
   go (Free (Index n f k)) actual expected descr =
     tryLens (Aeson.nth n) f actual expected k $
       descr ++ " failed to match any targets"
 
   go (Free (Assert p k)) actual expected descr =
-    either (return . ((descr ++ " failed assertion\n") ++)) (const []) (p actual)
+    either
+      (return . ((descr ++ " failed assertion\n") ++))
+      (const $ go k actual expected descr)
+      (p actual)
 
   go (Free Stop) _ _ _ = []
 
