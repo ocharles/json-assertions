@@ -18,8 +18,8 @@ import Control.MonadPlus.Indexed.Free (IxFree(..))
 import Data.Monoid (First)
 
 import qualified Control.Lens as Lens
-import qualified Control.Lens.Aeson as Aeson
 import qualified Data.Aeson as Aeson
+import qualified Data.Aeson.Lens as Aeson
 import qualified Data.Text as Text
 
 --------------------------------------------------------------------------------
@@ -84,13 +84,13 @@ jsonTest = (>>>= const stop)
 --------------------------------------------------------------------------------
 testJSON :: Aeson.ToJSON i => JSONTest i j a -> i -> [String]
 testJSON tests env = go tests (Aeson.toJSON env) env "subject"
- 
+
  where
 
   go :: JSONTest i j a -> Aeson.Value -> i -> String -> [String]
- 
+
   go (Pure _) _ _ _ = []
- 
+
   go (Free (Key key f k)) actual expected descr =
     tryLens (Aeson.key (Text.pack key)) f actual expected k $
       descr ++ "[\"" ++ key ++ "\"]"
