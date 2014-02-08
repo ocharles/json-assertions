@@ -10,7 +10,7 @@ maintainer:          ollie@ocharles.org.uk
 -- copyright:
 category:            Testing
 build-type:          Simple
--- extra-source-files:
+extra-source-files:  changelog
 cabal-version:       >=1.10
 
 library
