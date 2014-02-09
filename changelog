@@ -1,4 +1,4 @@
-# Version HEAD
+# Version 1.0.1
 
 * Dropped dependency on `lens-aeson`. Depend on `lens-4.0.*` and
   `aeson-0.7.*`.
