@@ -1,3 +1,7 @@
+# Version 1.0.2
+
+* Build with lens 4.1
+
 # Version 1.0.1
 
 * Dropped dependency on `lens-aeson`. Depend on `lens-4.0.*` and
