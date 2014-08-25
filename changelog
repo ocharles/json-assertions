@@ -1,3 +1,7 @@
+# Version 1.0.5
+
+* Build with lens < 4.5
+
 # Version 1.0.4
 
 * Build with lens < 4.4, aeson < 0.9
