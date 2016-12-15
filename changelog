@@ -1,3 +1,7 @@
+# Version 1.0.8
+
+* Build with lens < 4.16 and aeson < 1.0.3. Thanks to @alanz for noticing.
+
 # Version 1.0.7
 
 * Build with lens < 4.13
