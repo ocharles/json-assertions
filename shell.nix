@@ -9,7 +9,7 @@ let
       }:
       mkDerivation {
         pname = "json-assertions";
-        version = "1.0.7";
+        version = "1.0.8";
         src = ./.;
         libraryHaskellDepends = [
           aeson base indexed indexed-free lens lens-aeson text

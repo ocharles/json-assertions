@@ -1,5 +1,5 @@
 name: json-assertions
-version: 1.0.8
+version: 1.0.9
 synopsis: Test that your (Aeson) JSON encoding matches your expectations
 homepage: http://github.com/ocharles/json-assertions.git
 license: BSD3
@@ -15,7 +15,7 @@ extra-source-files: changelog
 library
   exposed-modules:     Test.JSON.Assertions
   build-depends:
-    aeson >= 0.7 && < 1.0.3,
+    aeson >= 0.7 && < 1.2,
     base >= 4.5 && < 5,
     indexed >= 0.1,
     indexed-free >= 0.3,
