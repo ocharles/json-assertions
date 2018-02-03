@@ -1,3 +1,7 @@
+# Version 1.0.10
+
+* Increase upper bound of `aeson` and `lens`
+
 # Version 1.0.9
 
 * Increase upper bound of `aeson`
