@@ -1,3 +1,7 @@
+# NEXT
+
+* Build with lens < 4.18
+
 # Version 1.0.12
 
 * Increase upper bound of `aeson`
